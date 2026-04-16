@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apparatus & Methods Register — Bletchley Park (dummy data)</title>
+<style>
+  :root {
+    --page: #EDE4D1;
+    --panel: #F5EFDF;
+    --panel-light: #FAF4E4;
+    --card: #F5EAD0;
+    --card-focus: #FBF2DC;
+    --card-hover: #F9EED5;
+    --ink: #2A241C;
+    --ink-mid: #3F362A;
+    --ink-muted: #5A4A35;
+    --ink-soft: #7A6542;
+    --border: #A6916B;
+    --border-strong: #8B6F47;
+    --border-soft: #D4C5A3;
+    --accent-dark: #4A3925;
+    --brass: #A88652;
+    --tier-hopping: #8B2F2F;
+    --tier-excited: #A06A1C;
+    --tier-flagged: #C19A3F;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--page); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; line-height: 1.5; }
+  body { min-height: 100vh; padding: 24px; }
+  .wrap { max-width: 1400px; margin: 0 auto; }
+  .header { padding: 0 0 18px; margin-bottom: 8px; border-bottom: 0.5px solid var(--border-soft); }
+  .header h1 { font-size: 22px; font-weight: 500; margin: 0; font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--ink); letter-spacing: 0.01em; }
+  .header .sub { font-size: 12px; color: var(--ink-muted); font-family: ui-monospace, Menlo, Consolas, monospace; margin-top: 4px; }
+  .demo-banner { display: inline-block; padding: 3px 8px; background: #F0D8B0; color: #5A3506; border: 0.5px solid #BA8F4A; border-radius: 3px; font-size: 10px; font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: 0.06em; text-transform: uppercase; margin-left: 10px; vertical-align: middle; }
+
+  .layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 14px; margin-top: 14px; }
+
+  .rail { background: var(--panel); border: 0.5px solid var(--border); border-radius: 3px; padding: 12px 14px; align-self: start; max-height: calc(100vh - 120px); overflow-y: auto; position: sticky; top: 24px; }
+  .main { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+  h3 { font-size: 13px; font-weight: 500; color: var(--ink-muted); margin: 0 0 8px; font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: 0.02em; }
+
+  .search { width: 100%; height: 32px; border: 0.5px solid var(--border-strong); background: var(--panel-light); border-radius: 3px; padding: 0 10px; font-size: 13px; color: var(--ink); font-family: ui-monospace, Menlo, Consolas, monospace; margin-bottom: 12px; }
+  .search::placeholder { color: #8B7A5A; }
+  .search:focus { outline: none; border-color: var(--accent-dark); background: #FDF8ED; }
+
+  .fgroup { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 0.5px solid var(--border-soft); }
+  .fgroup:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .flabel { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin-bottom: 5px; font-weight: 500; font-family: ui-monospace, Menlo, Consolas, monospace; }
+
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 3px; font-size: 11px; border: 0.5px solid var(--border-strong); cursor: pointer; margin: 2px 3px 2px 0; background: var(--panel-light); color: var(--ink-mid); font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .chip:hover { background: #F0E6CE; border-color: #6B5435; }
+  .chip.active { background: var(--accent-dark); color: #FBF2DC; border-color: #2A241C; }
+  .chip-count { font-size: 9px; opacity: 0.7; }
+
+  .stack-header { display: flex; align-items: center; justify-content: space-between; padding: 0 2px; }
+  .count { font-size: 12px; color: var(--ink-muted); font-family: ui-monospace, Menlo, Consolas, monospace; }
+
+  .cards { display: flex; flex-direction: column; gap: 8px; max-height: 390px; overflow-y: auto; padding-right: 4px; }
+  .cards::-webkit-scrollbar { width: 8px; }
+  .cards::-webkit-scrollbar-track { background: var(--panel); border-radius: 2px; }
+  .cards::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .cards::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: 4px; padding: 11px 15px 9px; cursor: pointer; position: relative; border-left-width: 4px; min-height: 112px; display: flex; flex-direction: column; }
+  .card:hover { background: var(--card-hover); }
+  .card.focused { background: var(--card-focus); border-color: var(--ink-muted); }
+  .card-HOPPING { border-left-color: var(--tier-hopping); }
+  .card-EXCITED { border-left-color: var(--tier-excited); }
+  .card-FLAGGED { border-left-color: var(--tier-flagged); }
+
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; padding-right: 70px; }
+  .card-id { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 10px; color: var(--ink-soft); white-space: nowrap; letter-spacing: 0.04em; }
+  .card-title { font-size: 15px; font-weight: 500; line-height: 1.3; color: var(--ink); margin: 0; }
+  .card-summary { font-size: 12px; color: var(--ink-mid); line-height: 1.5; margin: 2px 0 8px; flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .card-meta { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+
+  .tag { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 3px; font-size: 10px; font-weight: 500; font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: 0.02em; border: 0.5px solid transparent; }
+  .tag-HOPPING { background: #EED4D4; color: #6A1F1F; border-color: #C28888; }
+  .tag-EXCITED { background: #EBD4A8; color: #5A3506; border-color: #BA8F4A; }
+  .tag-FLAGGED { background: #ECDBA6; color: #6E541A; border-color: #BFA456; }
+  .tag-cat { background: #DCD1EC; color: #362A70; border-color: #8E7FBA; }
+  .tag-cluster { background: #CFE0D3; color: #1F4530; border-color: #7FA28B; }
+  .tag-donot { background: #6A1F1F; color: #FBF2DC; border-color: #4A1515; }
+  .tag-ts { background: var(--accent-dark); color: #FBF2DC; border-color: #2A241C; }
+  .tag-na { background: #D4C5A3; color: #3A2F1C; border-color: var(--border-strong); }
+  .tag-priority { background: #E8C8A3; color: #6E3A10; border-color: #B5824A; }
+  .tag-unver { background: #F0E6CE; color: #7A6542; border-color: #A6916B; }
+  .tag-flagct { background: #D4C5A3; color: #3A2F1C; border-color: var(--border-strong); }
+
+  .signal { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--ink-muted); font-family: ui-monospace, Menlo, Consolas, monospace; white-space: nowrap; }
+  .signal-bar { width: 42px; height: 4px; background: var(--border-soft); border-radius: 2px; overflow: hidden; border: 0.5px solid var(--border); }
+  .signal-fill { height: 100%; background: var(--ink-muted); }
+  .signal-derived { font-style: italic; opacity: 0.7; }
+
+  .card-actions { position: absolute; top: 9px; right: 12px; display: flex; gap: 4px; }
+  .icon-btn { width: 26px; height: 26px; border: 0.5px solid var(--border-strong); background: var(--panel-light); border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; line-height: 1; color: var(--ink-mid); padding: 0; font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 500; }
+  .icon-btn:hover { background: var(--accent-dark); color: #FBF2DC; border-color: #2A241C; }
+
+  .reader { background: var(--panel-light); border: 0.5px solid var(--border-strong); border-radius: 4px; padding: 18px 22px; font-size: 13px; line-height: 1.6; color: var(--ink); }
+  .reader.hidden { display: none; }
+  .reader h4 { font-size: 17px; font-weight: 500; margin: 0 0 2px; color: var(--ink); line-height: 1.3; }
+  .reader-sub { font-size: 11px; color: var(--ink-soft); font-family: ui-monospace, Menlo, Consolas, monospace; margin-bottom: 14px; letter-spacing: 0.04em; }
+  .reader-sec { margin-top: 14px; }
+  .reader-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin-bottom: 4px; font-weight: 500; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .reader-flag { font-size: 12px; background: #F0E6CE; padding: 6px 10px; border-radius: 3px; margin-bottom: 4px; border-left: 3px solid var(--border-strong); color: var(--ink); }
+  .reader-flag.hopping { border-left-color: var(--tier-hopping); background: #F7DEDE; }
+  .reader-flag.donot { border-left-color: #6A1F1F; background: #EED4D4; color: #6A1F1F; font-weight: 500; }
+  .reader-flag.trade { border-left-color: var(--accent-dark); background: #E8E2D0; }
+  .kv { display: grid; grid-template-columns: 150px minmax(0, 1fr); row-gap: 4px; column-gap: 10px; font-size: 12px; }
+  .kv dt { color: var(--ink-muted); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; }
+  .kv dd { margin: 0; color: var(--ink); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; word-break: break-word; }
+  .reader-actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+
+  .btn { height: 32px; padding: 0 14px; background: var(--panel-light); border: 0.5px solid var(--border-strong); border-radius: 3px; font-size: 12px; color: var(--ink); cursor: pointer; font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: 0.02em; }
+  .btn:hover { background: #F0E6CE; border-color: #6B5435; }
+  .btn.primary { background: var(--accent-dark); color: #FBF2DC; border-color: #2A241C; }
+  .btn.primary:hover { background: #2A241C; }
+  .btn.brass { background: var(--brass); color: #FBF2DC; border-color: #7A5A35; }
+  .btn.brass:hover { background: var(--border-strong); }
+
+  .bottom { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+  .comp { background: var(--panel); border: 0.5px solid var(--border); border-radius: 3px; padding: 13px 15px; min-height: 130px; }
+  .comp-members { display: flex; flex-direction: column; gap: 5px; max-height: 180px; overflow-y: auto; }
+  .comp-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: var(--card); border-left: 3px solid var(--border-strong); border-radius: 2px; font-size: 11px; }
+  .comp-id { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 10px; color: var(--ink-muted); white-space: nowrap; letter-spacing: 0.04em; }
+  .comp-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+  .comp-x { cursor: pointer; color: var(--ink-soft); font-size: 15px; line-height: 1; padding: 0 3px; }
+  .comp-x:hover { color: var(--ink); }
+  .empty { color: var(--ink-soft); font-size: 12px; font-style: italic; padding: 16px 0; text-align: center; font-family: ui-monospace, Menlo, Consolas, monospace; }
+
+  .meta-panel { background: var(--panel); border: 0.5px solid var(--border); border-radius: 3px; padding: 13px 15px; }
+  .comp-input { width: 100%; height: 30px; border: 0.5px solid var(--border-strong); background: var(--panel-light); border-radius: 3px; padding: 0 10px; font-size: 12px; color: var(--ink); font-family: ui-monospace, Menlo, Consolas, monospace; margin-bottom: 10px; }
+
+  .legend { display: flex; gap: 14px; font-size: 10px; color: var(--ink-muted); padding: 0 2px; font-family: ui-monospace, Menlo, Consolas, monospace; flex-wrap: wrap; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+  .hint { margin-left: auto; font-style: italic; }
+
+  .batch-banner { font-size: 11px; color: var(--ink-muted); font-family: ui-monospace, Menlo, Consolas, monospace; padding: 4px 8px; background: #F0E6CE; border-radius: 3px; border: 0.5px solid var(--border); display: inline-block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <h1>apparatus & methods register<span class="demo-banner">dummy data · screenshot safe</span></h1>
+    <div class="sub">H. Pettifer / Apparatus & Methods Register, Hut 8 Administration · MOST SECRET ULTRA · compilation dated 1944-11-03</div>
+  </div>
+
+  <div class="layout">
+
+    <aside class="rail">
+      <input type="text" class="search" placeholder="search register..." id="search"/>
+
+      <div class="fgroup">
+        <div class="flabel">Status</div>
+        <button class="chip active" data-f="status" data-v="all">all <span class="chip-count">28</span></button>
+        <button class="chip" data-f="status" data-v="unfilable">unfilable <span class="chip-count">22</span></button>
+        <button class="chip" data-f="status" data-v="priority">priority <span class="chip-count">1</span></button>
+        <button class="chip" data-f="status" data-v="donot">do not file <span class="chip-count">1</span></button>
+      </div>
+
+      <div class="fgroup">
+        <div class="flabel">Flags</div>
+        <button class="chip" data-f="priorityrisk" data-v="true">prior-art risk <span class="chip-count">1</span></button>
+        <button class="chip" data-f="tradesecret" data-v="true">trade secret <span class="chip-count">1</span></button>
+        <button class="chip" data-f="notapplicable" data-v="true">finding (not invention) <span class="chip-count">5</span></button>
+        <button class="chip" data-f="unverified" data-v="true">source unverified <span class="chip-count">1</span></button>
+      </div>
+
+      <div class="fgroup">
+        <div class="flabel">Confidence</div>
+        <button class="chip" data-f="tier" data-v="HOPPING">hopping <span class="chip-count">9</span></button>
+        <button class="chip" data-f="tier" data-v="EXCITED">excited <span class="chip-count">12</span></button>
+        <button class="chip" data-f="tier" data-v="FLAGGED">flagged <span class="chip-count">7</span></button>
+      </div>
+
+      <div class="fgroup">
+        <div class="flabel">Category</div>
+        <button class="chip" data-f="category" data-v="Apparatus">apparatus</button>
+        <button class="chip" data-f="category" data-v="Methodology">methodology</button>
+        <button class="chip" data-f="category" data-v="Cryptanalytic Finding">finding</button>
+      </div>
+
+      <div class="fgroup" style="border-bottom: none;">
+        <div class="flabel">Cluster</div>
+        <button class="chip" data-f="cluster" data-v="enigma">enigma (001-007)</button>
+        <button class="chip" data-f="cluster" data-v="bombe">bombe & methods (008-015)</button>
+        <button class="chip" data-f="cluster" data-v="tunny">tunny & colossus (016-021)</button>
+        <button class="chip" data-f="cluster" data-v="operations">ops & coordination (022-028)</button>
+      </div>
+    </aside>
+
+    <div class="main">
+
+      <div class="stack-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h3 style="margin: 0;">card stack</h3>
+          <span class="batch-banner">bp-full-v1 · 28 erga · 1939-1944</span>
+        </div>
+        <span class="count" id="count">28 cards</span>
+      </div>
+
+      <div class="cards" id="cards"></div>
+
+      <div class="legend">
+        <span><span class="dot" style="background: var(--tier-hopping);"></span>hopping</span>
+        <span><span class="dot" style="background: var(--tier-excited);"></span>excited</span>
+        <span><span class="dot" style="background: var(--tier-flagged);"></span>flagged</span>
+        <span class="hint">click opens · + adds to pile</span>
+      </div>
+
+      <div id="reader" class="reader hidden"></div>
+
+      <div class="bottom">
+        <div class="comp">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <h3 style="margin: 0;">compilation</h3>
+            <span class="count" id="comp-count">0 cards</span>
+          </div>
+          <input type="text" class="comp-input" id="comp-name" value="Bombe system claim — BP-001/002/004 integrated" placeholder="compilation name..."/>
+          <div class="comp-members" id="comp-list"></div>
+        </div>
+
+        <div class="meta-panel">
+          <h3 style="margin: 0 0 10px;">actions</h3>
+          <div class="flabel">Display fields</div>
+          <div style="margin-bottom: 14px;">
+            <button class="chip active" data-field="canonical_id">id</button>
+            <button class="chip active" data-field="summary">title</button>
+            <button class="chip" data-field="novelty_basis">novelty</button>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <button class="btn primary" onclick="alert('Export as filing packet — demo only')">export as packet ↗</button>
+            <button class="btn brass" onclick="alert('Save as compilation ergon — demo only')">save as ergon ↗</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const erga = [{"id":"BP-001","title":"Polish Bomba Kryptologiczna \u2014 Electromechanical Rotor-Position Search Apparatus","category":"Apparatus / Cryptanalytic Mechanism","tier":"HOPPING","date":"1939-09-14","summary":"Electromechanical apparatus devised by M. Rejewski, J. R\u00f3\u017cycki, and H. Zygalski of the Biuro Szyfr\u00f3w prior to the war, comprising six paired Enigma-analogue rotor assemblies driven in synchronism through the full rotor-position space, arresting upon detection of a characteristic indicator repetition. The apparatus mechanises what was previously manual search, reducing wheel-order determination from days to hours under the pre-war indicator procedure.","mechanism":"Six Enigma-analogue scrambler units, each comprising three rotors in an order corresponding to one of the six arrangements of three wheels drawn from the Wehrmacht's complement, are mounted upon a common drive. The drive advances all six assemblies through the rotor-position space in synchronism. An electrical circuit closes when the indicator repetition characteristic of pre-war double-encipherment of message keys is detected, halting the apparatus and indicating the candidate setting for manual verification.","novelty":"First known mechanisation of cryptanalytic search for Enigma rotor-order and position. Prior practice was wholly manual or assisted only by the cyclometer (a lesser precursor of the same authorship). The compound-rotor assembly drive is the distinguishing apparatus element; no device of comparable construction is known outside the Polish service.","priorArt":"The cyclometer (Rejewski, c. 1934) is the direct precursor but treats only single rotor pairs. German cryptographic services are not believed to possess comparable apparatus against their own machine. French Service de Renseignement (Bertrand's office) has had sight through trilateral liaison but has not developed independently.","source":"Pyry Conference Notes (25-26 July 1939)","registerRef":"App. Reg. Vol. I, fol. 1","flags":["Foundational entry. All subsequent British bombe-series entries depend upon the principles embodied herein.","Provenance: apparatus and principles are Polish in origin. Any postwar consideration of filing must preserve attribution to Rejewski, R\u00f3\u017cycki, and Zygalski. No British claim is properly independent of the Polish work.","Cannot be disclosed at present under any circumstances."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; foundational item; provenance complications preclude independent claim regardless","crossRefs":["BP-002","BP-004","BP-007"],"cluster":"enigma","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-002","title":"Turing Bombe \u2014 Menu-Driven Electromechanical Search with Crib-Based Logical Chain","category":"Apparatus / Cryptanalytic Mechanism","tier":"HOPPING","date":"1939-12-18","summary":"Electromechanical apparatus proposed by A. M. Turing for the systematic recovery of Enigma rotor settings from a presumed fragment of known plaintext (a 'crib'). The apparatus exploits logical chains of letter-substitutions implied by the crib rather than relying upon the double-encipherment of message keys. Distinct from the Polish bomba (BP-001) in that the Turing apparatus operates against the post-1938 Wehrmacht procedure \u2014 from which double-encipherment has been removed \u2014 and generalises to any indicator scheme in which a crib can be assembled.","mechanism":"The cryptanalyst assembles a 'menu' from the suspected crib: a graph of letter-substitutions that must hold at specified positions in the crib chain. The menu is wired into the bombe as a set of electrical connections between scrambler units. Each scrambler unit contains three rotors in the Enigma configuration. The bombe drives all scramblers through the rotor-position space in synchronism. At each position, the menu's logical implications are evaluated: a candidate position is accepted if, upon energising any single wire in the menu graph, the resulting current flow does not activate every wire (which would indicate logical inconsistency). Surviving candidates are indicated for manual verification.","novelty":"Three elements are new in combination. First: the apparatus acts upon arbitrary crib-derived logical chains, not upon a fixed indicator structure; this makes it independent of specific German operational procedures. Second: the mechanisation of logical chain evaluation (the 'menu') in electromechanical form is without known precedent. Third: the apparatus is driven by a cryptanalyst's judgment of likely plaintext rather than by statistical properties of the indicator, which shifts the cryptanalytic burden from mathematical discovery to linguistic anticipation.","priorArt":"The Polish bomba (BP-001) is the immediate ancestor in physical form and drive-mechanism but differs fundamentally in cryptanalytic method. No other apparatus is known to employ crib-based attack against rotor machines. German cryptographic services are not believed to possess comparable apparatus against their own machines nor against our own. Keen's mechanical expertise at British Tabulating is drawn upon for construction but the cryptanalytic design is Turing's.","source":"Turing memorandum, 'Proposal for a Machine' (Nov 1939)","registerRef":"App. Reg. Vol. I, fol. 4","flags":["HOPPING. Principal apparatus of our Enigma effort. The design is Turing's; construction is by British Tabulating Machine Co. under Keen's direction. Attribution complexities postwar will require careful handling.","Strongest postwar claim posture is in conjunction with BP-004 (diagonal board) as integrated apparatus \u2014 the bombe as presently operational is substantially different from the December 1939 proposal.","Cannot be disclosed at present under any circumstances."],"filingStatus":"UNFILABLE \u2014 wartime secrecy","crossRefs":["BP-001","BP-003","BP-004","BP-005","BP-013"],"cluster":"enigma","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-003","title":"Menu Construction \u2014 Crib-to-Logical-Graph Transformation Method","category":"Methodology / Cryptanalytic Procedure","tier":"EXCITED","date":"1940-02-08","summary":"Methodology by which a presumed crib of known plaintext and observed ciphertext is converted into the logical graph ('menu') consumed by the bombe (BP-002). The procedure identifies closed loops in the letter-substitution chain and selects menus that maximise the logical constraint strength for the bombe to exploit.","mechanism":"The cryptanalyst aligns the suspected crib against the observed ciphertext and records, at each position, the letter pair (plaintext, ciphertext) implied by the alignment. The pairs are drawn as a graph with letters as nodes and positions as edges. Closed loops in the graph are identified: a loop of n edges provides a constraint that, when wired into the bombe, reduces false stops by a factor approximately (26/n!). Menus with multiple closed loops of moderate length are preferred over menus with a single long loop or no loops.","novelty":"The explicit graph-theoretic formulation of the crib-to-menu transformation is cataloguer's characterisation; Welchman's original practice is less formal. The procedure as taught and documented in Hut 6 is, to our knowledge, unique; no other cryptanalytic service treats crib attack in this structural manner.","priorArt":"No prior art. The methodology is an original Hut 6 development, grown up around the bombe (BP-002) and refined iteratively as operational experience has accumulated.","source":"Hut 6 menu-construction memoranda (Jan-Feb 1940)","registerRef":"Meth. Reg. Vol. I, fol. 1","flags":["Methodology rather than apparatus. Patentability under peacetime statute is doubtful; this item is catalogued primarily as documentation.","Strongest argument for protection is as a dependent element of the integrated bombe system (BP-002 + BP-004)."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; patentability doubtful regardless","crossRefs":["BP-002","BP-004","BP-005"],"cluster":"enigma","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-004","title":"Diagonal Board \u2014 Logical Augmentation of the Bombe for Plugboard Self-Consistency","category":"Apparatus / Cryptanalytic Mechanism","tier":"HOPPING","date":"1940-05-12","summary":"A supplementary wiring matrix, appended to the bombe's scrambler assembly, which electrically enforces the self-consistency condition imposed by the Enigma plugboard \u2014 viz., that if plug A connects to plug B, then plug B connects to plug A. The diagonal board rejects rotor-position candidates that satisfy the menu's substitution requirements but violate plugboard reciprocity, reducing false stops to a degree that makes the apparatus operationally decisive.","mechanism":"A diagonal matrix of wires is interposed between the bombe's scrambler chain and its indicator circuits. The matrix realises the assertion 'if X\u2192Y at any position in the crib chain, then Y\u2192X must hold concurrently.' Positions that satisfy the menu but not the reciprocal constraint cause the matrix to short-circuit the stop condition; the bombe advances without halt. The apparatus thus halts only upon candidates jointly consistent with menu and plugboard reciprocity.","novelty":"The apparatus claim is threefold. First: the diagonal board is a middle-layer intervention in the bombe's logical chain \u2014 it does not replace the scrambler, nor re-implement the indicator circuits; it inserts a constraint between them. Second: the constraint is drawn from the cryptographic structure of the enemy apparatus (plugboard reciprocity) and is realised electromechanically rather than checked by hand. Third: the reduction in false stops is of an order (approximately twentyfold by present estimate) which converts the bombe from marginal to operationally decisive. The combination of middle-layer placement, cryptographic-structure-as-constraint, and order-of-magnitude efficiency gain has no known prior art.","priorArt":"The Polish bomba (BP-001) enforces no analogous constraint. Turing's original bombe specification (BP-002) anticipated a need for plugboard handling but proposed no specific apparatus; Welchman's construction is the first concrete realisation. No German device is believed to exist. No American work known at this date.","source":"Welchman memorandum to Travis, 2 May 1940","registerRef":"App. Reg. Vol. I, fol. 47","flags":["HOPPING \u2014 Apparatus claim of material significance. Bombe without the diagonal board is marginal; bombe with it is the principal instrument of our effort. This supports independent-claim posture should filing become possible.","Cannot be disclosed under any circumstances at present.","Postwar filing: the middle-layer-intervention argument is the claim's strongest posture. Efficiency gain alone might be argued as obvious-in-retrospect; the insertion-point and constraint-choice together are not."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; defer filing consideration to postwar review","crossRefs":["BP-001","BP-002","BP-003","BP-005"],"cluster":"enigma","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-005","title":"Stop-Verification Procedure \u2014 Electrical Voltage Test for Bombe Candidate Settings","category":"Methodology / Apparatus Support","tier":"EXCITED","date":"1940-06-03","summary":"Procedure by which a bombe stop is verified electrically before being passed to cryptanalytic decryption. A stop represents a candidate rotor setting; the procedure tests whether the candidate is logically consistent across the full menu graph rather than merely at the stop position. A test-register is applied, voltages are observed, and candidates passing the test are forwarded; failures advance the bombe to seek the next stop.","mechanism":"Upon a bombe stop, a test-register containing the menu graph is energised. Voltages are read at specified test-points. If voltages indicate full logical consistency across the menu, the stop is reported as a candidate; if any test-point shows inconsistency, the bombe resumes rotation. The procedure is performed by Wren operators who are trained in the electrical indications rather than in the underlying cryptanalysis.","novelty":"The voltage-test procedure is an original Hut 11 development specific to the diagonal-board bombe (BP-004). The separation of cryptanalytic knowledge (held by Hut 6 senior staff) from operational execution (held by Wren operators trained only in the test procedure) is itself a notable feature \u2014 it permits the bombe to operate around the clock without requiring cryptanalytic expertise at the machines themselves.","priorArt":"No prior art for the specific voltage-test procedure. The knowledge-separation principle has distant analogues in industrial production but the present application to cryptanalytic operations is original.","source":"Bombe operations manual (Hut 11), May 1940 edition","registerRef":"Meth. Reg. Vol. I, fol. 8","flags":["Methodology closely bound to BP-002 + BP-004; likely dependent element rather than independent claim.","The operator-cryptanalyst separation is worth noting as a distinct operational innovation; cataloguer is unsure whether it constitutes protectable subject matter."],"filingStatus":"UNFILABLE \u2014 wartime secrecy","crossRefs":["BP-002","BP-004"],"cluster":"enigma","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-006","title":"Enigma Rotor Wiring \u2014 Reverse-Engineered Internal Circuitry of Wehrmacht Apparatus","category":"Cryptanalytic Finding / Intelligence Asset","tier":"EXCITED","date":"1939-08-16","summary":"The internal wiring of the five Wehrmacht Enigma rotors, reverse-engineered mathematically by M. Rejewski in 1932-33 using messages and indicator-procedure regularities, communicated to British and French services at Pyry in July 1939. The wiring is the foundation of every subsequent decryption effort.","mechanism":"Each Enigma rotor comprises an electrical disc with 26 contacts on each face, wired internally as a substitution permutation. The five standard Wehrmacht rotors (I-V) each implement a different permutation. Rejewski's reconstruction derived these permutations mathematically from operational indicator data; captured physical rotors (acquired subsequently through various channels) have confirmed the reconstruction without exception.","novelty":"The reverse-engineering is a mathematical achievement without direct apparatus or methodology analogue. It is a cryptanalytic *result* rather than an invention. Registered here for completeness of the register and because all subsequent apparatus depends upon it.","priorArt":"The mathematical technique (resolution of permutation products) was published in the open literature by Rejewski after the war (cataloguer note: this is cataloguer's understanding from hearsay; Rejewski has not in fact published anything openly since 1939, being now in London with the Polish service-in-exile). The application to the Wehrmacht machine is not in the open literature and must not become so.","source":"Rejewski's reconstructed wiring diagrams (delivered at Pyry)","registerRef":"App. Reg. Vol. I, fol. 2","flags":["Not an invention per se; a cryptanalytic finding. Catalogued for register completeness.","Any postwar disclosure of the specific wiring is catastrophic to any remaining Enigma traffic (significant holdings by minor powers and successor states likely).","Attribution is Rejewski's; the register must preserve this regardless of any British claim posture on dependent apparatus."],"filingStatus":"NOT APPLICABLE \u2014 cryptanalytic finding, not invention; disclosure forbidden indefinitely","crossRefs":["BP-001","BP-002"],"cluster":"enigma","donotfile":false,"tradesecret":false,"notapplicable":true,"priorityrisk":false,"unverified":false},{"id":"BP-007","title":"Zygalski Sheets \u2014 Punched-Card Grid for Rotor-Position Elimination","category":"Methodology / Apparatus Support","tier":"HOPPING","date":"1939-10-22","summary":"A grid of punched paper sheets devised by H. Zygalski, by which rotor positions producing a particular indicator pattern (the 'female' pattern) can be eliminated through superposition of sheets representing different indicator observations. Aligning multiple sheets and identifying positions at which holes overlap yields a small candidate set of rotor settings.","mechanism":"Each sheet is a 51-by-51 grid (representing rotor-position space for a fixed wheel order and ring setting, modulo the turnover period). A hole is punched at each position where, for that sheet's indicator, the female pattern is mathematically possible. Multiple sheets, each corresponding to a different observed indicator, are stacked in register on a light table. Positions at which light passes through all sheets simultaneously are the candidate rotor settings consistent with all observations. Typically 8-12 sheets reduce the candidate set to a manageable handful.","novelty":"A mechanical-optical implementation of multi-observation constraint intersection. The use of physical superposition to realise logical AND across many observations is ingenious and, to our knowledge, unique.","priorArt":"No prior art known. The technique is original to the Polish service (Zygalski, c. 1938). No comparable technique is known in the French, British, or American services prior to Pyry.","source":"Zygalski sheet samples and procedures (delivered at Pyry)","registerRef":"Meth. Reg. Vol. I, fol. 3","flags":["HOPPING. Of all methods in the register, this is the one whose mere description most clearly teaches a cryptanalytic technique. Disclosure risk is not merely wartime: the principle (physical superposition for constraint intersection) is sufficiently elegant that it would be recognised and adapted rapidly.","TRADE SECRET POSTURE even postwar. Cataloguer recommends this item be considered for continuing secrecy even after cessation of hostilities, at least until rotor-machine cryptography is fully superseded in international practice.","Polish provenance. Cannot be a British claim independently."],"filingStatus":"TRADE SECRET \u2014 not merely wartime-unfilable; continuing-secrecy posture recommended","crossRefs":["BP-001","BP-006"],"cluster":"enigma","donotfile":false,"tradesecret":true,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-008","title":"Turing's Probability Treatise \u2014 Bayesian Framework for Cryptanalytic Evidence","category":"Methodology / Statistical Foundation","tier":"HOPPING","date":"1941-01-20","summary":"Theoretical treatise by A. M. Turing establishing a Bayesian framework for the evaluation and combination of cryptanalytic evidence. Introduces the 'ban' as a unit of evidence (being the base-ten logarithm of a likelihood ratio) and the 'deciban' (a tenth-part ban) as the practical working unit. Provides the theoretical foundation for Banburismus (BP-011) and for several subsequent methodologies.","mechanism":"The treatise presents the general Bayesian calculus \u2014 prior probability, likelihood, posterior \u2014 in notation suited to sequential cryptanalytic inference. Introduces 'weight of evidence' as log-likelihood-ratio. Establishes additive combination of independent evidence weights. Defines the ban (factor of ten in odds) and deciban (factor of ten-to-the-one-tenth, approximately 1.26). Works through cryptanalytic examples including rotor-order scoring and plaintext-frequency matching.","novelty":"Three distinct contributions. First: the systematic Bayesian treatment of cryptanalysis is without known precedent; prior cryptanalytic work relied on ad-hoc judgments of plausibility. Second: the evidence-unit framework (ban/deciban) is an original formalisation of log-likelihood evidence with practical computational properties. Third: the treatise's generality extends beyond cryptanalysis: any sequential evidence-combination problem can be handled by the same framework. Cataloguer notes that this last point may be of significance postwar in fields remote from cryptography.","priorArt":"R. A. Fisher's likelihood theory (published since 1920s) is the mathematical ancestor; Turing's contribution is the systematic application to sequential practical inference and the unit framework. Wald's sequential analysis (recent American work; cataloguer has heard of it through liaison channels but has not read the papers) appears to be an independent and contemporaneous development of related ideas. The relative priority will be a matter for postwar assessment.","source":"Turing, 'The Applications of Probability to Cryptography' (internal, circa late 1940)","registerRef":"Meth. Reg. Vol. I, fol. 22","flags":["HOPPING. The treatise's application far exceeds cryptanalysis. The ban-unit framework is applicable to any sequential evidence problem.","Postwar publication consideration: the underlying mathematical content, if divorced from the cryptanalytic examples, may be publishable and may secure a priority claim for Turing's work ahead of or alongside Wald's.","Patentability of mathematical methods is doubtful under present statute.","Cannot be disclosed at present."],"filingStatus":"UNFILABLE \u2014 wartime; postwar publication recommended for scientific priority","crossRefs":["BP-011","BP-018","BP-019"],"cluster":"bombe","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-009","title":"Kiss Technique \u2014 Exploitation of Dual-System Message Repetition","category":"Methodology / Cryptanalytic Procedure","tier":"EXCITED","date":"1941-06-12","summary":"Cryptanalytic technique exploiting occasions when the same message is transmitted on two different cryptographic systems (a 'kiss'). If one system is broken and the other is not, the kiss provides a crib for the unbroken system. If neither is broken, the kiss provides a constraint that the two plaintexts are identical despite different ciphertexts.","mechanism":"Y-service intercepts are cross-referenced across networks and cryptographic systems. Repeated patterns \u2014 identical message lengths transmitted near-simultaneously on different networks, certain stereotyped message types known to be transmitted on multiple systems \u2014 flag candidate kisses. Upon identification, the plaintext recovered from the broken system is used as crib material for the unbroken one; the derived rotor settings are then tested by the bombe (BP-002).","novelty":"The systematic exploitation of multi-system traffic overlap as a cryptanalytic resource is, to our knowledge, original to Hut 8. Prior cryptanalytic practice has treated each system independently.","priorArt":"Unknown prior art in British, American, or French services. German cryptographic services appear unaware of the vulnerability.","source":"Hut 8 operational memoranda (May-Jun 1941)","registerRef":"Meth. Reg. Vol. I, fol. 31","flags":["Methodology rather than apparatus; patentability doubtful.","Operational value is profound but the technique depends on enemy procedural errors that could be corrected at any time. Disclosure would trigger immediate correction.","Cannot be disclosed at present."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; patentability doubtful regardless","crossRefs":["BP-002","BP-011"],"cluster":"bombe","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-010","title":"Y-Service Traffic Selection \u2014 Systematic Intercept-to-Cryptanalysis Flow","category":"Methodology / Operational System","tier":"EXCITED","date":"1940-08-04","summary":"The systematic procedure by which radio intercepts from the Y-stations (Cheadle, Chicksands, Scarborough, and elsewhere) are logged, prioritised, routed to the appropriate hut, and integrated with cryptanalytic effort. Traffic characteristics \u2014 frequency, preamble format, call-sign patterns, time-of-day \u2014 determine system identification and priority.","mechanism":"Y-station operators log intercepts with time, frequency, call sign, and copied text. Duplicate intercepts from multiple stations are de-duplicated at Hut 4. Traffic is classified by preamble analysis into cryptographic system (Army Enigma, Naval Enigma, Air Force Enigma, Tunny, lesser systems). Priority is assigned by estimated operational value; high-priority traffic is routed to the relevant hut within hours of intercept.","novelty":"An operational system rather than an invention in the ordinary sense. The specific pipeline \u2014 intercept \u2192 log \u2192 deduplicate \u2192 classify \u2192 prioritise \u2192 route \u2014 is the first large-scale integrated cryptanalytic intelligence operation to our knowledge.","priorArt":"No direct prior art. Earlier wireless intelligence operations (First War, Room 40) were smaller and less systematic. The American effort under OP-20-G and Arlington Hall is contemporaneous and, by liaison report, structurally similar though independently developed.","source":"Hut 4 traffic-handling procedures (Jul-Aug 1940)","registerRef":"Meth. Reg. Vol. I, fol. 14","flags":["Operational system. Patentability under peacetime statute is doubtful; the value is in operational efficacy, not in protectable invention.","The pipeline model may have postwar application to any large-scale signals-intelligence operation. Cataloguer notes without prejudice."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; operational system rather than invention","crossRefs":["BP-009","BP-022"],"cluster":"bombe","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-011","title":"Banburismus \u2014 Sequential Bayesian Reduction of Rotor-Order Hypothesis Space","category":"Methodology / Statistical Cryptanalysis","tier":"EXCITED","date":"1941-03-18","summary":"Statistical procedure by which candidate rotor-order hypotheses for the naval Enigma are progressively weighted and rejected by accumulation of evidence drawn from the coincidence-rate of message pairs in depth. Uses punched sheets prepared in Banbury (whence the name), superposed in pairs such that visible coincidences register the statistical signal.","mechanism":"Intercepted messages believed to share rotor setting (in 'depth') are punched onto Banbury sheets. Pairs of sheets are superposed and shifted through relative offsets; coincidences are counted. The observed rate is compared against null and alternative hypotheses; log-likelihood scores in decibans are accumulated across many pairs. Candidates scoring below threshold are rejected; survivors proceed to bombe processing.","novelty":"First application of sequential likelihood-ratio reasoning to practical cryptanalysis. The ban/deciban evidence-unit is original (BP-008). The conversion of a combinatorial problem into a statistical hypothesis-test with defined thresholds and combination calculus is methodologically novel. The Banbury sheet is a practical embodiment, separable from the methodology.","priorArt":"Mathematical foundation (sequential probability testing) is recognisable in the statistical literature. Wald's contemporaneous American work is similar at the mathematical level; cataloguer has not sighted the papers. No German cryptanalytic service employs comparable methodology by our assessment.","source":"Turing's probability treatise (BP-008) and Hut 8 procedural memoranda","registerRef":"Meth. Reg. Vol. I, fol. 27","flags":["EXCITED. Methodology rather than apparatus; patentability doubtful under present statute regardless.","The sheet apparatus is separable from the methodology and could be claimed independently as an apparatus of sequential-coincidence analysis.","Postwar: the ban/deciban framework has utility beyond cryptanalysis and may support a priority-publication strategy for Turing's theoretical contribution (BP-008)."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; apparatus element may be separately considered postwar","crossRefs":["BP-002","BP-008","BP-014"],"cluster":"bombe","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-012","title":"Crib Prediction from Stereotyped Messages \u2014 Linguistic Crib Assembly Method","category":"Methodology / Cryptanalytic Procedure","tier":"EXCITED","date":"1940-10-07","summary":"Methodology for anticipating plaintext content from operational and linguistic regularities of German radio traffic, thereby supplying cribs for bombe menu construction (BP-003). Exploits stereotyped messages (weather reports, unit-status reports, routine situation reports) whose form is predictable from intercept metadata even when the content is unknown.","mechanism":"Categories of stereotyped traffic are catalogued: weather reports from fixed stations have near-identical openings; unit-status reports have fixed field orders; Afrika Korps situation reports have Rommel's characteristic phrasings. Cryptanalysts identify candidate cribs by matching observed message lengths and transmission patterns against the catalogue. Candidate cribs are tested by the menu-construction procedure (BP-003) and then submitted to the bombe (BP-002).","novelty":"The systematic cataloguing of enemy operational stereotypes as a cryptanalytic resource is, to our knowledge, without prior art. The approach treats enemy discipline-failures as a cryptanalytic asset.","priorArt":"No known prior art. Traffic analysis in earlier cryptanalytic work has examined message characteristics for intelligence purposes but not for crib provision.","source":"Hut 6 crib-prediction memoranda (Sep-Oct 1940)","registerRef":"Meth. Reg. Vol. I, fol. 17","flags":["Methodology; patentability doubtful.","Operational value depends on enemy failure to vary message stereotypes. Disclosure triggers immediate correction of the failure.","Cannot be disclosed at present."],"filingStatus":"UNFILABLE \u2014 wartime secrecy","crossRefs":["BP-002","BP-003"],"cluster":"bombe","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-013","title":"High-Speed Bombe (U.S. Navy Variant) \u2014 Electrical Re-Implementation of Bombe Principles","category":"Apparatus / Derivative Device","tier":"FLAGGED","date":"1943-05-03","summary":"U.S. Navy re-implementation of the Turing-Welchman bombe (BP-002, BP-004) using electrical rather than electromechanical principles, developed by J. R. Desch of National Cash Register Co. under commission from OP-20-G. Operates at approximately twentyfold the speed of British bombes. Catalogued here because our work is the direct ancestor.","mechanism":"The Desch Bombe substitutes electrical commutators for the British bombes' rotating drums, permitting operation at several thousand positions per second rather than several hundred. The cryptanalytic principles (menu-based attack, diagonal-board plugboard enforcement) are identical to our bombe.","novelty":"The novelty is entirely in the engineering: higher operating speed through electrical substitution for electromechanical components. The cryptanalytic design is not novel \u2014 it is our design, transferred under liaison.","priorArt":"This item is a DERIVATIVE of BP-002 and BP-004. Cataloguer registers it for completeness but notes that any independent British claim to the Desch Bombe would be inappropriate; any American claim must acknowledge the British origin of the cryptanalytic design.","source":"OP-20-G liaison correspondence (Apr-May 1943)","registerRef":"App. Reg. Vol. II, fol. 12","flags":["*** POSSIBLE DERIVATIVE of BP-002 + BP-004 \u2014 DO NOT FILE INDEPENDENTLY ***","Cataloguer registers this item to prevent any future misattribution of the design origin. The engineering is American; the cryptanalytic design is British (and ultimately Polish in root).","Liaison attribution questions may become complicated postwar; recommend this entry be retained as documentary evidence."],"filingStatus":"DO NOT FILE \u2014 derivative device; retained as attribution record only","crossRefs":["BP-002","BP-004"],"cluster":"bombe","donotfile":true,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-014","title":"Depth-Finding Procedure \u2014 Statistical Identification of Co-Keyed Messages","category":"Methodology / Cryptanalytic Procedure","tier":"EXCITED","date":"1941-04-22","summary":"Procedure for identifying which intercepted messages share a rotor setting (are 'in depth') in the absence of indicator information. Statistical tests on the ciphertexts themselves reveal depth relationships without requiring any broken keys.","mechanism":"Pairs of ciphertexts are compared for their coincidence rate: if each letter of one ciphertext is compared to the corresponding letter of the other, a ciphertext pair in depth will show a coincidence rate near 1/17 (the natural-language coincidence rate of German), while pairs not in depth will show rate near 1/26 (random). The test is applied at various offsets; the offset giving the highest coincidence rate indicates the relative displacement. Statistical significance is scored in decibans per BP-008.","novelty":"Systematic statistical depth-finding as an input to Banburismus (BP-011). The procedure is the logical precondition for Banburismus and is itself an original Hut 8 contribution.","priorArt":"The coincidence-rate statistic is due to Friedman (American work, 1920s); its systematic application to depth-finding in a modern rotor-machine context is original here.","source":"Hut 8 depth-finding memoranda (Mar-Apr 1941)","registerRef":"Meth. Reg. Vol. I, fol. 29","flags":["Methodology; patentability doubtful.","Depends on Friedman's coincidence-rate statistic for its mathematical foundation; acknowledgement appropriate in any postwar publication."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; patentability doubtful","crossRefs":["BP-008","BP-011"],"cluster":"bombe","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-015","title":"Naval Indicator Procedure Analysis \u2014 Recovery of Daily-Key Structure","category":"Cryptanalytic Finding","tier":"FLAGGED","date":"1941-05-08","summary":"Detailed analysis of the German Naval Enigma daily-key indicator procedure, reconstructed from captured Kenngruppenbuch material and operational intercepts. The analysis identifies the procedural steps by which the German operator selects and communicates the daily key, revealing specific attack points.","mechanism":"The indicator procedure is reconstructed step-by-step: selection of a trigram from the Kenngruppenbuch, encipherment of the trigram through the daily key, transmission in a specified position of the message header, and recipient's reverse procedure to recover the daily key. Each step's mechanics and operator habits yield attack opportunities.","novelty":"This is a cryptanalytic finding rather than an invention. Catalogued for completeness as it is referenced by several methodology entries.","priorArt":"Not applicable \u2014 finding, not invention.","source":"Hut 8 indicator analysis papers (Apr-May 1941)","registerRef":"Meth. Reg. Vol. I, fol. 30","flags":["Cryptanalytic finding, not invention. Registered for completeness.","Disclosure would teach future users of rotor-machine systems how to design against our attacks. Continuing secrecy posture strongly recommended."],"filingStatus":"NOT APPLICABLE \u2014 cryptanalytic finding; continuing secrecy recommended","crossRefs":["BP-011","BP-014"],"cluster":"bombe","donotfile":false,"tradesecret":false,"notapplicable":true,"priorityrisk":false,"unverified":false},{"id":"BP-016","title":"Tunny (Lorenz SZ40/42) Structure \u2014 Reverse-Engineered Cipher Machine Logical Design","category":"Cryptanalytic Finding / Apparatus Analysis","tier":"HOPPING","date":"1942-01-30","summary":"Reverse-engineering of the logical structure of the German Tunny machine (Lorenz SZ40/42) from intercepted traffic alone, without any captured physical apparatus. W. T. Tutte derived the machine's internal wheel pattern, wheel lengths, and combining function entirely by mathematical analysis of a single long depth-message in August 1941.","mechanism":"The German operator's procedural error \u2014 transmission of two long messages using the same wheel starting position, one with a typographical correction midway through \u2014 allowed Tiltman to recover both plaintexts and derive the key stream. Tutte's subsequent analysis of the key stream derived the machine's structure: twelve wheels arranged in three sets (psi, chi, mu) with specific lengths and combining rules, without ever seeing the machine.","novelty":"Complete logical reconstruction of a complex cipher machine from a single operational error, without physical access, is without known prior art in any cryptanalytic literature. Tutte's mathematical derivation is a remarkable intellectual achievement.","priorArt":"Rejewski's reconstruction of Enigma rotor wiring (BP-006) is the nearest analogue but involved a much simpler machine and relied on indicator-procedure regularities rather than a single depth-message.","source":"Tiltman / Tutte papers on Tunny structure (Aug 1941 \u2013 Jan 1942)","registerRef":"App. Reg. Vol. II, fol. 3","flags":["HOPPING. Mathematical achievement of the first order; attribution to Tutte (and to Tiltman for the initial break) must be preserved.","Cryptanalytic finding rather than invention; not patentable as such, but the mathematical technique may be publishable postwar with appropriate abstraction.","Foundation for BP-017, BP-018, BP-019, BP-025."],"filingStatus":"NOT APPLICABLE \u2014 finding, not invention; postwar publication of mathematical technique may be appropriate","crossRefs":["BP-006","BP-017","BP-018"],"cluster":"tunny","donotfile":false,"tradesecret":false,"notapplicable":true,"priorityrisk":false,"unverified":false},{"id":"BP-017","title":"Colossus \u2014 Programmable Electronic Valve-Based Computing Apparatus","category":"Apparatus / Electronic Computing","tier":"HOPPING","date":"1944-02-05","summary":"Electronic computing apparatus employing approximately 1,500 thermionic valves (Colossus Mk I; Mk II: approximately 2,400) for high-speed statistical processing of intercepted Tunny ciphertext. Operational as of February 1944. The apparatus performs Boolean operations and counting functions programmed by switch and plugboard settings, reading ciphertext from a paper-tape at approximately 5,000 characters per second. It is the first programmable electronic computing apparatus of which we have any knowledge.","mechanism":"A continuous loop of paper tape bearing intercepted Tunny ciphertext is read optically at high speed. Per-character Boolean operations (combining tape content with internally-generated wheel patterns per BP-016) are performed in valve circuits. Count-registers accumulate results over many wheel-pattern hypotheses. Outputs are read on a typewriter. The specific Boolean operation and counting function is programmed by the operator via switches and plugboards.","novelty":"Three distinct novelties in combination. First: large-scale use of thermionic valves for computation, at a scale where valve-failure rates were considered by prior engineering opinion to be prohibitive. Flowers' contribution is the demonstration that valves kept continuously powered are sufficiently reliable for sustained computation. Second: programmable operation \u2014 the apparatus is not fixed-function; its Boolean and counting behaviour is determined by operator programming. Third: electronic rather than electromechanical, permitting operation at character rates two orders of magnitude beyond the bombe.","priorArt":"Atanasoff-Berry Computer (American, 1939-42) employs valves for computation but is not programmable in the Colossus sense; cataloguer has only hearsay knowledge. Zuse's work in Germany (if it exists) is unknown to us. Aiken's Harvard Mark I (American, 1944) is electromechanical rather than electronic. To our knowledge, no comparable electronic-and-programmable apparatus exists.","source":"Flowers engineering specification (Nov 1943)","registerRef":"App. Reg. Vol. II, fol. 31","flags":["HOPPING. The apparatus represents a significant advance in computing beyond its cryptanalytic application.","Attribution: design is T. H. Flowers (Post Office Research Station, Dollis Hill); mathematical requirements set by Newman (Newmanry, BP). Postwar filing posture is complicated by Flowers being a Post Office employee \u2014 the Post Office's interest in his work must be considered.","The wartime-secrecy posture applies; but additionally, the apparatus's application to cryptanalysis is inseparable from its operational context. Postwar, the *general* programmable-computation argument may be separable from the Tunny-specific content and thus may be publicly describable.","Cannot be disclosed at present under any circumstances."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; postwar filing posture requires Post Office consultation and separation of general-computation from Tunny-specific aspects","crossRefs":["BP-016","BP-018","BP-019","BP-025"],"cluster":"tunny","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-018","title":"Newmanry Statistical Method \u2014 Delta-Coincidence Attack on Tunny Wheel Patterns","category":"Methodology / Statistical Cryptanalysis","tier":"HOPPING","date":"1943-06-14","summary":"Statistical cryptanalytic method for recovering Tunny wheel patterns by detection of small departures from randomness in the delta (first-difference) of intercepted ciphertext. The method identifies wheel-pattern candidates by accumulating evidence from millions of character-comparisons \u2014 computational work made practicable only by mechanical means, initially the Heath Robinson tape machines and subsequently Colossus (BP-017).","mechanism":"Tunny ciphertext is differenced (each character XORed with its successor) to reveal a statistical bias characteristic of the chi wheels. Candidate chi-wheel patterns are tested by counting coincidences between the differenced ciphertext and the candidate pattern over long message runs. Candidates producing coincidence counts departing significantly from the null distribution are accepted; Turing's deciban framework (BP-008) provides the significance thresholds. Once chi patterns are recovered, further statistical steps (the 'psi' attack) recover the remaining wheels.","novelty":"The delta-coincidence attack is an original Newmanry development combining Tutte's structural analysis (BP-016) with Turing's statistical framework (BP-008). The application of mechanical high-speed statistical processing to cryptanalysis at this scale has no precedent.","priorArt":"No prior art for the specific method. The mathematical ancestry is in Turing's probability work (BP-008) and Tutte's structure derivation (BP-016). No comparable method known outside Bletchley.","source":"Newman memorandum to Travis (May 1943)","registerRef":"Meth. Reg. Vol. II, fol. 2","flags":["HOPPING. The methodology is foundational to the Tunny effort and inseparable in importance from Colossus (BP-017) as the instrument that makes the method practicable.","Postwar: the general statistical-computing principle (high-speed mechanical accumulation of evidence across large data) has application far beyond cryptanalysis. Cataloguer flags this for appropriate attention.","Cannot be disclosed at present."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; methodology rather than apparatus; postwar generalisation may support publication of underlying statistical computing principles","crossRefs":["BP-008","BP-016","BP-017","BP-019"],"cluster":"tunny","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-019","title":"Heath Robinson \u2014 Electromechanical Precursor to Colossus","category":"Apparatus / Cryptanalytic Mechanism","tier":"EXCITED","date":"1943-06-04","summary":"Electromechanical apparatus (named after the cartoonist's fanciful machines) that implements the delta-coincidence attack (BP-018) by comparing two paper tapes \u2014 one carrying ciphertext, one carrying a candidate wheel pattern \u2014 run in synchronism past a photoelectric reader. Counts are accumulated electromechanically. Operational from June 1943; superseded in most operational work by Colossus (BP-017) from early 1944.","mechanism":"Two paper tapes are driven in synchronism past photoelectric heads at approximately 1,000 characters per second. Corresponding characters from the two tapes are combined by electrical logic; the result is counted by an electromechanical register. Over a full loop of the ciphertext tape, the total count is read out. Operators then adjust the pattern tape and repeat for the next candidate.","novelty":"The apparatus is the first application of photoelectric tape reading and synchronous tape comparison to cryptanalytic statistical work. The synchronism of two tapes at 1,000 characters per second is an engineering achievement by TRE and Post Office personnel.","priorArt":"No direct prior art. Tape readers in teleprinter equipment operate at much lower speeds and are not designed for synchronous comparison.","source":"Newmanry engineering notes (May-Jun 1943)","registerRef":"App. Reg. Vol. II, fol. 22","flags":["Superseded in practice by Colossus (BP-017), but remains in use for certain tasks and is catalogued as its direct precursor.","Engineering attribution is shared between TRE, Post Office, and Newmanry; will require careful handling postwar."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; superseded by BP-017 for most operational work","crossRefs":["BP-017","BP-018"],"cluster":"tunny","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-020","title":"Testery Hand Methods \u2014 Human-Executed Tunny Decryption Procedures","category":"Methodology / Cryptanalytic Procedure","tier":"EXCITED","date":"1942-07-15","summary":"Suite of hand procedures by which Tunny messages are decrypted once the wheel patterns have been established (by methods such as BP-018). The Testery procedures use no mechanical assistance beyond writing materials; they exploit the mathematical structure of the Tunny machine (BP-016) to recover plaintext by successive deduction.","mechanism":"Given a candidate wheel-pattern set and an intercepted ciphertext, the Testery procedure applies the inverse of the Tunny combining operation character by character, using structured worksheets to track the recovery of psi wheel positions, then chi wheel positions, and finally the plaintext. Skilled operators can decrypt a full message in hours.","novelty":"The specific procedures are original Testery developments; no prior hand-decryption methodology for a machine of Tunny's complexity is known. The procedures scale to the full traffic volume through training of many operators rather than through mechanical substitution.","priorArt":"Hand methods for simpler cipher systems are well established; none approach the complexity handled by the Testery procedures.","source":"Testery operational manuals (Jun-Jul 1942)","registerRef":"Meth. Reg. Vol. I, fol. 48","flags":["Methodology; patentability doubtful.","Remarkable human achievement; cataloguer notes for the register without suggesting protection posture.","Complementary to Newmanry's statistical methods; the two sections' procedures are integrated in practice."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; patentability doubtful","crossRefs":["BP-016","BP-018"],"cluster":"tunny","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-021","title":"Wheel-Setting Recovery Procedure \u2014 Setting Stage After Pattern Recovery","category":"Methodology / Cryptanalytic Procedure","tier":"FLAGGED","date":"1943-08-29","summary":"Procedure for determining the starting positions of the Tunny wheels for each individual message, once the underlying wheel patterns have been recovered by BP-018. Setting is a distinct cryptanalytic problem from pattern recovery and is handled by both Newmanry and Testery methods depending on traffic character.","mechanism":"For each message, the operator's chosen wheel-start positions must be recovered. Newmanry's statistical setting uses Colossus (BP-017) to test all chi-wheel starting positions against the delta-coincidence criterion; once chi positions are set, the psi positions are found by further statistical or hand methods.","novelty":"Procedural rather than inventive; the setting stage is mathematically simpler than pattern recovery but operationally critical.","priorArt":"No direct prior art; application-specific to the Tunny machine.","source":"Newmanry setting procedures (Aug 1943)","registerRef":"Meth. Reg. Vol. II, fol. 11","flags":["Catalogued for completeness of the Tunny workflow.","Likely dependent element; no independent claim posture."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; dependent element","crossRefs":["BP-017","BP-018","BP-020"],"cluster":"tunny","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-022","title":"Traffic-Analysis Fingerprinting \u2014 Network Identification from Call-Sign and Frequency Patterns","category":"Methodology / Signals Intelligence","tier":"FLAGGED","date":"1943-02-18","summary":"Methodology by which enemy radio networks are identified and tracked by characteristics of their operations (call signs, frequencies, schedules, preamble formats, operator fists) rather than by decryption of their content. Traffic-analysis findings are used to prioritise cryptanalytic work and to provide intelligence in advance of or independent of decryption.","mechanism":"Y-service logs are analysed for patterns across stations, frequencies, and times. Call sign patterns reveal network structure; frequency assignments reveal operational geography; operator fists (the characteristic timing and style of individual Morse operators) reveal specific station identities even as call signs change. A structured fingerprint is maintained for each identified network.","novelty":"The systematic cataloguing of network fingerprints for intelligence purposes is a well-established practice in this war and earlier. The specific integration with cryptanalytic prioritisation is the BP-specific element, but cataloguer is uncertain whether this rises to independent invention status.","priorArt":"Traffic analysis is a long-established wireless intelligence practice; applications to cryptanalytic prioritisation may be established earlier than our work. Cataloguer has not verified priority.","source":"Newmanry summary only; primary Hut 6 TA documentation not re-pulled for this entry","registerRef":"Meth. Reg. Vol. II, fol. 1","flags":["FLAGGED. Source documentation not directly verified for this entry; re-verification recommended before any postwar action.","Patentability highly doubtful; traffic analysis as a practice predates BP by decades.","Catalogued primarily to document our procedures."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; patentability highly doubtful; source re-verification recommended","crossRefs":["BP-010"],"cluster":"operations","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":true},{"id":"BP-023","title":"Fish Liaison Classification \u2014 Multi-System Tunny Network Taxonomy","category":"Methodology / Operational Classification","tier":"FLAGGED","date":"1943-09-11","summary":"Taxonomy by which the several German non-Morse teleprinter networks are classified. The family is designated 'Fish'; individual networks bear fish-species names (Tunny for the Berlin-Army link, Sturgeon for Kriegsmarine variant, Thrasher for another, etc.). Classification permits distinct cryptanalytic handling of each network's traffic.","mechanism":"Each network's distinctive machine-type, frequency, call-sign, and traffic-character fingerprint is catalogued under its fish-name designation. New networks detected by BP-022 are assigned fish-names upon classification. Cryptanalytic resources are allocated per fish-name based on operational priority.","novelty":"Classification-taxonomic system; not an invention in the ordinary sense. Catalogued for register completeness and to document Fish-family naming convention for postwar reference.","priorArt":"Not applicable \u2014 taxonomy rather than invention.","source":"Hut 4 classification memoranda (Aug-Sep 1943)","registerRef":"Meth. Reg. Vol. II, fol. 15","flags":["Taxonomic convention; no filing posture.","Naming convention may have trademark relevance if Fish-name usage is continued postwar in any technical publication."],"filingStatus":"NOT APPLICABLE \u2014 taxonomy","crossRefs":["BP-016","BP-022"],"cluster":"operations","donotfile":false,"tradesecret":false,"notapplicable":true,"priorityrisk":false,"unverified":false},{"id":"BP-024","title":"Depth-Compression Rule \u2014 Operational Indicator for Recoverable Traffic Volume","category":"Methodology / Operational Heuristic","tier":"FLAGGED","date":"1942-11-19","summary":"Operational rule of thumb relating the number of messages intercepted on a given key to the tractability of breaking that key. Below a certain threshold (variable by system), insufficient depth exists for Banburismus (BP-011) to be effective; above another threshold, the key becomes reliably breakable. The rule permits triage of cryptanalytic effort.","mechanism":"Empirical thresholds are maintained for each cryptographic system based on past operational experience. Daily intercept volumes per key are compared against the thresholds; effort is allocated to keys falling in the productive range.","novelty":"Operational heuristic; no claim to invention. Catalogued for register completeness.","priorArt":"Not applicable.","source":"Hut 8 operational heuristics (Nov 1942)","registerRef":"Meth. Reg. Vol. I, fol. 56","flags":["Operational heuristic; no filing posture.","Valuable operationally but not protectable subject matter."],"filingStatus":"NOT APPLICABLE \u2014 operational heuristic","crossRefs":["BP-011","BP-014"],"cluster":"operations","donotfile":false,"tradesecret":false,"notapplicable":true,"priorityrisk":false,"unverified":false},{"id":"BP-025","title":"General-Purpose Programmable Computation \u2014 Claim Separable from Cryptanalytic Application","category":"Apparatus / Computing Principle","tier":"HOPPING","date":"1944-07-04","summary":"Cataloguer's registration of the general-purpose programmable computation principle as a claim-category separable from the specific Tunny-cryptanalytic application of Colossus (BP-017). The argument is that the programmability and electronic-valve principles embodied in Colossus are applicable to any computational task expressible in Boolean-and-counting terms, and that this general capability may be publicly describable postwar even while the specific Tunny application remains secret.","mechanism":"The Colossus apparatus, considered without reference to its Tunny-specific programming, implements a class of computations: Boolean combination of two or more input streams and counting of specified output states. Any problem reducible to this form can be computed by Colossus with appropriate programming. Cataloguer notes that census tabulation, statistical analysis of experimental data, and certain engineering calculations fall within this class.","novelty":"Cataloguer asserts that the general-purpose programmable electronic computing apparatus is without prior art (subject to the Atanasoff-Berry caveat noted in BP-017). This is the largest potential claim in the register by scope. Cataloguer notes this with appropriate uncertainty: the claim depends on separability of the general-purpose capability from the Tunny-specific embodiment, and on the postwar evolution of computing technology generally.","priorArt":"Atanasoff-Berry Computer (hearsay). Zuse (unknown). Aiken (electromechanical, not electronic). No known apparatus combines all three elements (programmable, electronic, operational at scale). Cataloguer's confidence in novelty is HOPPING but acknowledges that prior-art discovery in American and continental European work may occur postwar.","source":"Cataloguer's own assessment, with Newman and Flowers consultation (Jun-Jul 1944)","registerRef":"App. Reg. Vol. II, fol. 44","flags":["HOPPING. This is the largest potential filing by scope in the entire register. The general-computing argument is separable from Tunny; postwar, with Newman and Flowers' cooperation and Post Office consent, a filing on general-purpose electronic programmable computing may be possible without disclosing the cryptanalytic application.","This entry is cataloguer's own assessment and requires senior review before any action. Newman has given tentative concurrence; Flowers is concerned about the Post Office's position.","Prior art risk is real: American work (ENIAC, ABC) may establish priority we cannot contest without disclosing our own work. Cataloguer flags this as a reason for prompt action at cessation of hostilities rather than delay.","The strongest postwar posture may be Newman's individually rather than the Crown's, depending on how the Post Office question resolves."],"filingStatus":"UNFILABLE AT PRESENT \u2014 wartime secrecy. Postwar filing action strongly recommended as soon as circumstances permit; prior-art risk increases with delay.","crossRefs":["BP-017","BP-018","BP-019"],"cluster":"operations","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":true,"unverified":false},{"id":"BP-026","title":"Wheel-Pattern Change Detection \u2014 Automated Identification of Enemy Key Changes","category":"Methodology / Operational Monitoring","tier":"EXCITED","date":"1944-04-22","summary":"Procedure for detecting when German operators change Tunny wheel patterns, by monitoring the success rate of the current pattern set against new traffic. When success rate falls below threshold, the patterns are assumed changed and a recovery effort (BP-018) is initiated for the new patterns.","mechanism":"Incoming Tunny traffic is routinely tested against the current wheel-pattern set by Colossus (BP-017). The proportion of messages yielding acceptable decryptions is tracked as a rolling statistic. Falls below operational threshold trigger re-recovery of patterns.","novelty":"Continuous-monitoring application of BP-018 to operational context. Methodology rather than independent invention.","priorArt":"No direct prior art for continuous pattern-change detection in cryptanalysis.","source":"Newmanry monitoring procedures (Mar-Apr 1944)","registerRef":"Meth. Reg. Vol. II, fol. 29","flags":["Operational methodology; patentability doubtful.","Integrates BP-017 and BP-018 for specific operational purpose."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; patentability doubtful","crossRefs":["BP-017","BP-018"],"cluster":"operations","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-027","title":"Plaintext Emendation Protocol \u2014 Correction of Partial Decryptions for Intelligence Use","category":"Methodology / Operational Procedure","tier":"EXCITED","date":"1942-10-08","summary":"Procedure by which partial or corrupted decryptions are emended to usable form by Hut 3 translators with knowledge of German military terminology, operational context, and idiom. Bombe-recovered Enigma decryptions are frequently incomplete; Hut 3's emendation produces the form ultimately reported to operational users.","mechanism":"Decryption output from Hut 6 is passed to Hut 3 translators. Missing characters, corrupted passages, and ambiguous abbreviations are resolved by reference to operational context, parallel traffic, and established German military vocabulary. Emendations are marked distinctly from recovered text so that intelligence users can distinguish firm from interpolated content.","novelty":"The specific Hut 3 procedure is developed to scale; the underlying principle (context-guided emendation of cryptographic decryptions) is older. The distinction is scale and formalisation.","priorArt":"Context-guided emendation is an old practice in cryptography. Hut 3's specific procedures are an original scaling.","source":"Hut 3 translation and emendation procedures (Sep-Oct 1942)","registerRef":"Meth. Reg. Vol. I, fol. 53","flags":["Procedural; patentability doubtful.","Catalogued for operational completeness of the Enigma-decryption workflow."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; patentability doubtful","crossRefs":["BP-002","BP-010"],"cluster":"operations","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false},{"id":"BP-028","title":"Cross-Section Coordination Procedures \u2014 Formal Inter-Hut Workflow","category":"Methodology / Operational System","tier":"FLAGGED","date":"1943-04-30","summary":"Formalisation of the inter-section workflow by which intercepts flow from Y-service through Hut 4, to cryptanalytic huts (6 for Army/Air, 8 for Navy, Newmanry for Tunny), to translation (Hut 3 for Enigma, Testery for Tunny), and to intelligence reporting. The procedures coordinate priority-setting, resource allocation across huts, and feedback from intelligence users back to cryptanalytic prioritisation.","mechanism":"A daily priority conference sets cryptanalytic targets based on intelligence requirements received from service customers (Admiralty, War Office, Air Ministry). Section heads allocate resources per target. A standing liaison structure moves output between sections with tracking of message identifiers through each stage.","novelty":"Large-scale inter-section workflow for cryptanalytic intelligence production is the first of its kind at this scale. The procedures are BP-specific but their general structure may have application to any large signals-intelligence operation.","priorArt":"No direct prior art. Room 40 in the First War was a smaller operation with less formal inter-section coordination.","source":"Director's consolidated operating procedures (Apr 1943)","registerRef":"Meth. Reg. Vol. II, fol. 4","flags":["Operational system rather than invention; patentability highly doubtful.","Catalogued for register completeness and as reference for any postwar standing organisation of comparable work."],"filingStatus":"UNFILABLE \u2014 wartime secrecy; patentability doubtful","crossRefs":["BP-010","BP-022"],"cluster":"operations","donotfile":false,"tradesecret":false,"notapplicable":false,"priorityrisk":false,"unverified":false}];
+
+function signalFor(tier, priorityrisk) {
+  const ranges = { HOPPING: [0.85, 0.95], EXCITED: [0.70, 0.80], FLAGGED: [0.55, 0.70] };
+  const r = ranges[tier];
+  const mid = (r[0] + r[1]) / 2;
+  return priorityrisk ? mid - 0.05 : mid;
+}
+
+const state = {
+  filters: { status: "all", tier: null, category: null, cluster: null, priorityrisk: null, tradesecret: null, notapplicable: null, unverified: null },
+  search: "", focusedIdx: 0, openId: null, compilation: [],
+  compFields: new Set(["canonical_id", "summary"])
+};
+
+const cardsEl = document.getElementById("cards");
+const readerEl = document.getElementById("reader");
+const compListEl = document.getElementById("comp-list");
+const compCountEl = document.getElementById("comp-count");
+const countEl = document.getElementById("count");
+const searchEl = document.getElementById("search");
+
+function primaryCategory(cat) { return cat.split(" / ")[0].trim(); }
+
+function matches(e) {
+  const f = state.filters;
+  if (f.status === "unfilable" && !(e.filingStatus.includes("UNFILABLE"))) return false;
+  if (f.status === "priority" && !e.priorityrisk) return false;
+  if (f.status === "donot" && !e.donotfile) return false;
+  if (f.tier && e.tier !== f.tier) return false;
+  if (f.category && !e.category.includes(f.category)) return false;
+  if (f.cluster && e.cluster !== f.cluster) return false;
+  if (f.priorityrisk === "true" && !e.priorityrisk) return false;
+  if (f.tradesecret === "true" && !e.tradesecret) return false;
+  if (f.notapplicable === "true" && !e.notapplicable) return false;
+  if (f.unverified === "true" && !e.unverified) return false;
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    const hay = (e.title + " " + e.summary + " " + e.id + " " + e.novelty).toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
+function filtered() { return erga.filter(matches); }
+
+function renderCards() {
+  const list = filtered();
+  countEl.textContent = list.length + " card" + (list.length === 1 ? "" : "s");
+  if (list.length === 0) {
+    cardsEl.innerHTML = '<div class="empty">No cards match current filters.</div>';
+    return;
+  }
+  cardsEl.innerHTML = list.map((e, i) => {
+    const isFocused = state.openId === e.id;
+    const inComp = state.compilation.includes(e.id);
+    const sig = signalFor(e.tier, e.priorityrisk);
+    return `<div class="card card-${e.tier} ${isFocused ? "focused" : ""}" data-id="${e.id}">
+      <div class="card-actions">
+        <button class="icon-btn" data-action="add" data-id="${e.id}" title="${inComp ? 'Remove from pile' : 'Add to pile'}">${inComp ? "✓" : "+"}</button>
+        <button class="icon-btn" data-action="open" data-id="${e.id}" title="Open">›</button>
+      </div>
+      <div class="card-head">
+        <h4 class="card-title">${e.title}</h4>
+        <span class="card-id">${e.id}</span>
+      </div>
+      <p class="card-summary">${e.summary}</p>
+      <div class="card-bottom">
+        <div class="card-meta">
+          <span class="tag tag-${e.tier}">${e.tier.toLowerCase()}</span>
+          <span class="tag tag-cat">${primaryCategory(e.category)}</span>
+          <span class="tag tag-cluster">${e.cluster}</span>
+          ${e.donotfile ? '<span class="tag tag-donot">DO NOT FILE</span>' : ""}
+          ${e.tradesecret ? '<span class="tag tag-ts">trade secret</span>' : ""}
+          ${e.notapplicable ? '<span class="tag tag-na">finding</span>' : ""}
+          ${e.priorityrisk ? '<span class="tag tag-priority">prior-art risk</span>' : ""}
+          ${e.unverified ? '<span class="tag tag-unver">source unverified</span>' : ""}
+          ${e.flags.length ? `<span class="tag tag-flagct">${e.flags.length} flag${e.flags.length === 1 ? "" : "s"}</span>` : ""}
+        </div>
+        <div class="signal">
+          <span class="signal-derived">sig ~${sig.toFixed(2)}</span>
+          <div class="signal-bar"><div class="signal-fill" style="width: ${Math.round(sig * 100)}%"></div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderReader() {
+  if (!state.openId) { readerEl.classList.add("hidden"); return; }
+  const e = erga.find(x => x.id === state.openId);
+  if (!e) { readerEl.classList.add("hidden"); return; }
+  readerEl.classList.remove("hidden");
+  const sig = signalFor(e.tier, e.priorityrisk);
+  const flagClass = (f) => {
+    if (/DO NOT FILE/i.test(f)) return "donot";
+    if (/TRADE SECRET/i.test(f)) return "trade";
+    if (/HOPPING/.test(f)) return "hopping";
+    return "";
+  };
+  readerEl.innerHTML = `
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+      <h4>${e.title}</h4>
+      <button class="icon-btn" onclick="closeReader()" style="width: 26px; height: 26px;">×</button>
+    </div>
+    <div class="reader-sub">${e.id} · ${e.date} · ${e.source}</div>
+
+    <div class="reader-sec"><div class="reader-label">Summary</div><div>${e.summary}</div></div>
+    ${e.mechanism ? `<div class="reader-sec"><div class="reader-label">Mechanism</div><div>${e.mechanism}</div></div>` : ""}
+    <div class="reader-sec"><div class="reader-label">Novelty basis</div><div>${e.novelty}</div></div>
+    <div class="reader-sec"><div class="reader-label">Prior art notes</div><div>${e.priorArt}</div></div>
+    ${e.flags.length ? `<div class="reader-sec">
+      <div class="reader-label">Counsel flags</div>
+      ${e.flags.map(f => `<div class="reader-flag ${flagClass(f)}">${f}</div>`).join("")}
+    </div>` : ""}
+    <div class="reader-sec">
+      <div class="reader-label">Metadata</div>
+      <dl class="kv">
+        <dt>category</dt><dd>${e.category}</dd>
+        <dt>cluster</dt><dd>${e.cluster}</dd>
+        <dt>filing status</dt><dd>${e.filingStatus}</dd>
+        <dt>date anchor</dt><dd>${e.date}</dd>
+        <dt>confidence</dt><dd>${e.tier.toLowerCase()} · sig ~${sig.toFixed(2)} (tier-derived)</dd>
+        <dt>register ref</dt><dd>${e.registerRef}</dd>
+        <dt>primary source</dt><dd>${e.source}</dd>
+        <dt>cross-refs</dt><dd>${e.crossRefs.join(", ") || "(none)"}</dd>
+      </dl>
+    </div>
+    <div class="reader-actions">
+      <button class="btn primary" onclick="toggleInComp('${e.id}')">${state.compilation.includes(e.id) ? "remove from pile" : "add to pile"}</button>
+      <button class="btn brass" onclick="alert('Generate invention disclosure form — demo only')">export as IDF ↗</button>
+      <button class="btn" onclick="alert('Show dependency graph — demo only')">related erga ↗</button>
+    </div>
+  `;
+}
+
+function renderComp() {
+  compCountEl.textContent = state.compilation.length + " card" + (state.compilation.length === 1 ? "" : "s");
+  if (state.compilation.length === 0) {
+    compListEl.innerHTML = '<div class="empty">drag or click cards to add.</div>';
+    return;
+  }
+  compListEl.innerHTML = state.compilation.map(id => {
+    const e = erga.find(x => x.id === id);
+    return `<div class="comp-row">
+      ${state.compFields.has("canonical_id") ? `<span class="comp-id">${e.id}</span>` : ""}
+      ${state.compFields.has("summary") ? `<span class="comp-title">${e.title}</span>` : '<span class="comp-title"></span>'}
+      ${state.compFields.has("novelty_basis") ? `<span style="color: var(--ink-soft); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">${e.novelty.substring(0, 60)}...</span>` : ""}
+      <span class="comp-x" onclick="toggleInComp('${e.id}')">×</span>
+    </div>`;
+  }).join("");
+}
+
+function toggleInComp(id) {
+  const i = state.compilation.indexOf(id);
+  if (i >= 0) state.compilation.splice(i, 1); else state.compilation.push(id);
+  renderCards(); renderReader(); renderComp();
+}
+window.toggleInComp = toggleInComp;
+window.closeReader = function() { state.openId = null; renderReader(); renderCards(); };
+
+document.querySelectorAll(".chip[data-f]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const f = btn.dataset.f, v = btn.dataset.v;
+    if (f === "status") {
+      document.querySelectorAll('.chip[data-f="status"]').forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.filters.status = v;
+    } else if (["priorityrisk", "tradesecret", "notapplicable", "unverified"].includes(f)) {
+      if (state.filters[f] === "true") { state.filters[f] = null; btn.classList.remove("active"); }
+      else { state.filters[f] = "true"; btn.classList.add("active"); }
+    } else {
+      if (state.filters[f] === v) { state.filters[f] = null; btn.classList.remove("active"); }
+      else {
+        document.querySelectorAll(`.chip[data-f="${f}"]`).forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.filters[f] = v;
+      }
+    }
+    renderCards();
+  });
+});
+
+document.querySelectorAll(".chip[data-field]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const f = btn.dataset.field;
+    if (state.compFields.has(f)) { state.compFields.delete(f); btn.classList.remove("active"); }
+    else { state.compFields.add(f); btn.classList.add("active"); }
+    renderComp();
+  });
+});
+
+searchEl.addEventListener("input", (ev) => { state.search = ev.target.value; renderCards(); });
+
+cardsEl.addEventListener("click", (ev) => {
+  const btn = ev.target.closest("[data-action]");
+  if (btn) {
+    ev.stopPropagation();
+    const id = btn.dataset.id;
+    if (btn.dataset.action === "add") toggleInComp(id);
+    else if (btn.dataset.action === "open") {
+      state.openId = id;
+      renderCards();
+      renderReader();
+      setTimeout(() => {
+        const focused = cardsEl.querySelector(".card.focused");
+        if (focused) focused.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 0);
+    }
+    return;
+  }
+  const card = ev.target.closest(".card");
+  if (card) {
+    state.openId = card.dataset.id;
+    renderCards();
+    renderReader();
+    setTimeout(() => {
+      const focused = cardsEl.querySelector(".card.focused");
+      if (focused) focused.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 0);
+  }
+});
+
+renderCards();
+renderComp();
+</script>
+</body>
+</html>
